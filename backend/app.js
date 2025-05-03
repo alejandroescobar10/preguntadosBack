@@ -25,6 +25,11 @@ if (mongoose.connection.readyState === 0) {
 // Rutas
 app.use('/api', quizRoutes);
 
+// ✅ Ruta raíz (muestra mensaje cuando accedes a /)
+app.get('/', (req, res) => {
+  res.send('🎉 ¡El backend de Preguntados está funcionando en Vercel!');
+});
+
 // 👇 Elimina app.listen()
 // app.listen(PORT, () => {
 //   console.log(`Servidor corriendo en http://localhost:${PORT}`);
