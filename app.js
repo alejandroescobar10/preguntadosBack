@@ -12,7 +12,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'https://preguntados-front.vercel.app', // dominio exacto del frontend
+  origin: 'https://preguntados-front.vercel.app/', // dominio exacto del frontend
   methods: ['GET', 'POST'],
   credentials: true
 }));
