@@ -54,7 +54,10 @@ app.get('/', (req, res) => {
     status: '✅ Conectado a MongoDB y OpenAI'
   });
 });
-
+// Iniciar el servidor
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
+});
 // ⚠️ No usar app.listen() si despliegas en Vercel
 // En local puedes habilitarlo así:
 // if (process.env.NODE_ENV !== 'production') {
@@ -62,4 +65,3 @@ app.get('/', (req, res) => {
 //   app.listen(PORT, () => console.log(`🚀 Servidor local en puerto ${PORT}`));
 // }
 
-export default app;
