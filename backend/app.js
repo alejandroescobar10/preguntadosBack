@@ -1,10 +1,30 @@
 import express from 'express';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import cors from 'cors';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import quizRoutes from './routes/quizRoutes.js';
 
+// Directorio actual (para .env checks)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Cargar variables de entorno
 dotenv.config();
+
+// Verificar si existe la clave de OpenAI
+if (!process.env.OPENAI_API_KEY) {
+  console.warn('\x1b[33m%s\x1b[0m', '⚠️  ADVERTENCIA: Falta OPENAI_API_KEY');
+  console.log('\x1b[36m%s\x1b[0m', 'Configura tu archivo .env así:');
+  console.log('OPENAI_API_KEY=tu-clave\n');
+  
+  const envPath = path.join(__dirname, '.env');
+  if (!fs.existsSync(envPath)) {
+    console.log('\x1b[31m%s\x1b[0m', '❌ No se encontró el archivo .env');
+  }
+}
 
 const app = express();
 
@@ -12,9 +32,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Conexión a MongoDB solo si no está conectada aún
+// Conexión a MongoDB
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/preguntados';
+
 if (mongoose.connection.readyState === 0) {
-  mongoose.connect(process.env.MONGO_URI, {
+  mongoose.connect(MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
@@ -22,18 +44,23 @@ if (mongoose.connection.readyState === 0) {
   .catch(err => console.error('❌ Error conectando a MongoDB:', err));
 }
 
-// Rutas
+// Rutas de la API
 app.use('/api', quizRoutes);
 
-// ✅ Ruta raíz (muestra mensaje cuando accedes a /)
+// Ruta raíz para verificar estado
 app.get('/', (req, res) => {
-  res.send('🎉 ¡El backend de Preguntados está funcionando en Vercel!');
+  res.json({
+    message: '🎉 API de Preguntados funcionando correctamente en Vercel',
+    status: '✅ Conectado a MongoDB y OpenAI',
+    fecha: new Date().toLocaleString()
+  });
 });
 
-// 👇 Elimina app.listen()
-// app.listen(PORT, () => {
-//   console.log(`Servidor corriendo en http://localhost:${PORT}`);
-// });
+// ⚠️ No usar app.listen() si despliegas en Vercel
+// En local puedes habilitarlo así:
+// if (process.env.NODE_ENV !== 'production') {
+//   const PORT = process.env.PORT || 5000;
+//   app.listen(PORT, () => console.log(`🚀 Servidor local en puerto ${PORT}`));
+// }
 
-// ✅ Exportar para Vercel
 export default app;
