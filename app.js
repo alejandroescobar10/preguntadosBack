@@ -36,6 +36,7 @@ app.get('/', (req, res) => {
     status: '✅ Conectado a MongoDB y OpenAI'
   });
 });
+const PORT = process.env.PORT || 5000;
 // Iniciar el servidor
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
