@@ -51,8 +51,7 @@ app.use('/api', quizRoutes);
 app.get('/', (req, res) => {
   res.json({
     message: '🎉 API de Preguntados funcionando correctamente en Vercel',
-    status: '✅ Conectado a MongoDB y OpenAI',
-    fecha: new Date().toLocaleString()
+    status: '✅ Conectado a MongoDB y OpenAI'
   });
 });
 
