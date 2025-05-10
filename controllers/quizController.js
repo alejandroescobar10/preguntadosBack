@@ -32,7 +32,8 @@ export const getQuestions = async (req, res) => {
 
   const prompt = `Genera 5 preguntas básicas de cultura general sobre el tema "${tema}". 
 Cada pregunta debe tener 4 opciones (A, B, C, D) y debe indicar cuál es la opción correcta. 
-El formato debe ser un arreglo JSON con este esquema:
+Devuelve *solo* un JSON válido, sin explicaciones ni texto adicional. 
+El formato debe ser exactamente así:
 
 [
   {
@@ -44,8 +45,7 @@ El formato debe ser un arreglo JSON con este esquema:
       "D": "Berlín"
     },
     "respuesta_correcta": "B"
-  },
-  ...
+  }
 ]`;
 
   try {
@@ -54,7 +54,7 @@ El formato debe ser un arreglo JSON con este esquema:
       messages: [
         {
           role: "system",
-          content: "Eres un generador de preguntas para un juego educativo. Devuelve exactamente un JSON válido con el formato solicitado. No expliques nada."
+          content: "Eres un generador de preguntas para un juego educativo. Devuelve únicamente un JSON válido como el del ejemplo. No agregues explicaciones."
         },
         { role: "user", content: prompt }
       ],
@@ -63,22 +63,32 @@ El formato debe ser un arreglo JSON con este esquema:
     });
 
     const content = completion.choices[0].message.content;
+    console.log("📥 Respuesta cruda de OpenAI:", content);
 
     let preguntas;
+
     try {
-      preguntas = JSON.parse(content);
+      // Intentar extraer solo el JSON válido con expresión regular
+      const match = content.match(/\[\s*{[\s\S]*?}\s*]/);
+      if (!match) throw new Error("No se encontró un array JSON válido en la respuesta");
+
+      preguntas = JSON.parse(match[0]);
     } catch (err) {
       console.error("❌ Error al parsear JSON:", err);
-      return res.status(500).json({ error: "La IA no devolvió un JSON válido", raw: content });
+      return res.status(500).json({
+        error: "La IA no devolvió un JSON válido",
+        raw: content
+      });
     }
 
     res.json({ preguntas });
 
   } catch (error) {
-    console.error('❌ Error al generar preguntas:', error);
+    console.error('❌ Error al generar preguntas con OpenAI:', error);
     res.status(500).json({ error: 'Error al generar preguntas con IA', details: error.message });
   }
 };
+
 
 // Guardar juego en la base de datos
 export const saveGame = async (req, res) => {
